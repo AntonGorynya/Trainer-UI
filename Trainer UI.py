@@ -10,7 +10,6 @@ import xlwt
 #os.environ['QT_DEBUG_PLUGINS'] = '1'
 
 
-
 class ExampleApp(QtWidgets.QMainWindow, design.Ui_Dialog):
     def __init__(self):
         # Это здесь нужно для доступа к переменным, методам
@@ -21,6 +20,8 @@ class ExampleApp(QtWidgets.QMainWindow, design.Ui_Dialog):
         self.pushButton.clicked.connect(self.generate_report)
         self.pushButton_2.clicked.connect(self.selectFile)
         self.pushButton_3.clicked.connect(self.send_report)
+        self.pushButton_4.clicked.connect(self.generate_certificate)
+        self.pushButton_5.clicked.connect(self.send_emails)
 
     def selectFile(self):
         print("choose input file 1")
@@ -44,11 +45,31 @@ class ExampleApp(QtWidgets.QMainWindow, design.Ui_Dialog):
             print('HCSA-VMS')
         if self.radioButton_4.isChecked():
             courses = main_backend.courses_HCSP
+        if self.radioButton_5.isChecked():
+            courses = main_backend.courses_HiWatch
         if courses is not None:
-            wb = main_backend.coursesReport(courses, self.dateEdit.text(), self.dateEdit_2.text(), report)
+            wb = main_backend.coursesReport(courses, self.dateEdit.text(), self.dateEdit_2.text(), report, transliterate=self.checkBox.isChecked())
             filename = QtWidgets.QFileDialog.getSaveFileName(self, 'Save File', '', ".xls(*.xls)")
             wb.save(filename[0])
         return 0
+    def generate_certificate(self):
+        print('start generating certificates')
+        if self.radioButton_5.isChecked():
+            type = main_backend.courses_HiWatch[0]['type']
+        else:
+            type = 'HCSA'
+        print(type)
+        main_backend.create_word_certificate(self.lineEdit_3.text(), type=type)
+        return 0
+    def send_emails(self):
+        print('sending emails ....')
+        main_backend.FROM = self.lineEdit_4.text()
+        main_backend.PASSWORD_EMAIL = self.lineEdit_5.text()
+        print(main_backend.FROM)
+        print(main_backend.PASSWORD_EMAIL)
+        main_backend.send_emails()
+        return 0
+
 
 
 
